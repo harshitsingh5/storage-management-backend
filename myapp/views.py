@@ -1,11 +1,29 @@
 # from sys import api_version
 # from django.shortcuts import render
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from .aws import *
 from .drive import *
 from .dropbox import *
+import os
+
+cur_path = os.path.dirname(__file__)
+MIMETYPES = {
+        'application/vnd.google-apps.document': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.google-apps.presentation': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        # see https://developers.google.com/drive/v3/web/mime-types
+        'text/plain': 'text/plain'
+    }
+EXTENSTIONS = {
+        'application/vnd.google-apps.document': '.docx',
+        'application/vnd.google-apps.spreadsheet': '.xlsx',
+        'application/vnd.google-apps.presentation': '.pptx',
+        'text/plain': '.txt',
+}
+
 
 class AwsFiles(GenericAPIView):
     queryset = []
@@ -88,6 +106,11 @@ class DriveFiles(GenericAPIView):
         title = request.GET['title']
         mimetype = request.GET['mimetype']
         res = drive_download_file(file_id, title,mimetype)
+        complete_filename = title+EXTENSTIONS[mimetype]
+        mypath = os.path.join(cur_path,'..//files//download//') + str(complete_filename)
+        with open(mypath, 'rb') as f:
+            res = FileWrapper(f)
+            return HttpResponse(res, status=status.HTTP_200_OK)
         data = {'file':title, 'status':res}
         return Response(data, status=status.HTTP_200_OK)
 
@@ -110,7 +133,7 @@ class DropboxListFiles(GenericAPIView):
         folder_path = request.data['folder_path']
         fileList = dropbox_list_files(folder_path)
         queryset = fileList
-        data = {'fileList': fileList}
+        data = {'fileList': fileList, 'currentPath': folder_path}
         return Response(data=data, status=status.HTTP_200_OK)
 
 
@@ -121,8 +144,13 @@ class DropboxFiles(GenericAPIView):
         filename = request.GET['filename']
         filepath = request.GET['filepath']
         res = dropbox_download_file(filename, filepath)
-        data = {'file':filename, 'status':res}
-        return Response(data, status=status.HTTP_200_OK)
+        mypath = os.path.join(cur_path,'..//files//download//') + str(filename)
+        with open(mypath, 'rb') as f:
+            res = FileWrapper(f)
+            return HttpResponse(res, status=status.HTTP_200_OK)
+        # data = {'file':filename, 'data':res}
+        data = {'result':res}
+        return HttpResponse(res, status=status.HTTP_200_OK)
 
     def post(self, request):
         dropbox_file_path = request.data['dropbox_file_path']

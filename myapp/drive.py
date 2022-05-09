@@ -2,18 +2,23 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import os
 import shutil
-
+from wsgiref.util import FileWrapper
 
 gauth = GoogleAuth()
+gauth.LoadCredentialsFile("mycreds.txt")
+if gauth.credentials is None:
+    gauth.LocalWebserverAuth()
+elif gauth.access_token_expired:
+    gauth.Refresh()
+else:
+    gauth.Authorize()
+gauth.SaveCredentialsFile("mycreds.txt")
 drive = GoogleDrive(gauth)
 cur_path = os.path.dirname(__file__)
 
 MIMETYPES = {
-        # Drive Document files as MS dox
         'application/vnd.google-apps.document': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        # Drive Sheets files as MS Excel files.
         'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        # Drive presentation as MS pptx
         'application/vnd.google-apps.presentation': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         # see https://developers.google.com/drive/v3/web/mime-types
         'text/plain': 'text/plain'
@@ -31,7 +36,9 @@ def drive_list_files(folder_id='root'):
     fileList = drive.ListFile({'q': x}).GetList()
     data = []
     for file1 in fileList:
-        title = file1['title']
+        name = str(file1['title'])
+        ext = str(EXTENSTIONS.get(file1['mimeType'],''))
+        title = name + ext if not name.endswith(ext) else name
         id  = file1['id']
         typee = file1['mimeType'].split('.')[-1]
         mimetype = file1['mimeType']
@@ -61,6 +68,7 @@ def drive_download_file(file_id, title, mimetype):
     source = os.path.join(cur_path,'..//') + str(complete_filename)
     dest = os.path.join(cur_path,'..//files//download//') + str(complete_filename)
     shutil.move(source, dest)
+    return
     return "Download Successful"
 
 

@@ -2,6 +2,7 @@ from .config import *
 import dropbox
 import os
 import pathlib
+from wsgiref.util import FileWrapper
 
 cur_path = os.path.dirname(__file__)
 
@@ -13,7 +14,8 @@ def dropbox_list_files(folder_path=""):
         for file in response.entries:
             # print(file)
             # print('--------------------------------')
-            data.append({'name':file.name, 'id':file.id, 'type': str(type(file)), 'path_display': file.path_display})
+            typee = 'folder' if 'FolderMetadata' in str(type(file)) else 'file'
+            data.append({'title':file.name, 'id':file.id, 'type': typee, 'path_display': file.path_display})
         return data
     except Exception as e:
         return('Error getting list of files from Dropbox: ' + str(e))
@@ -40,6 +42,9 @@ def dropbox_download_file(filename, dropbox_file_path):
         with open(mypath, 'wb') as f:
             metadata, result = dbx.files_download(path=dropbox_file_path)
             f.write(result.content)
+        # with open(mypath, 'rb') as f:
+            # x = f.read().encode('utf-8')
+            return
         return 'File downloaded successfully'
     except Exception as e:
         return('Error downloading file from Dropbox: ' + str(e))

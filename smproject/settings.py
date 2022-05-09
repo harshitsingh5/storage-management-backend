@@ -27,9 +27,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -38,6 +40,21 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
+
+# CORS_ORIGIN_ALLOW_ALL = True
+# ALLOWED_HOSTS = ['*']
+
+# CORS_ORIGIN_WHITELIST = [
+#     "http://localhost:3000",
+#     "https://localhost:3000",
+#     # "https://relaxed-curie-e9a516.netlify.app",
+#     "http://127.0.0.1:3000",
+#     "https://127.0.0.1:3000"
+# ]
 
 ROOT_URLCONF = 'smproject.urls'
 

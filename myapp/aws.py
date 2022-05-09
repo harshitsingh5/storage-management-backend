@@ -26,12 +26,12 @@ def download_file(bucket_name, object_name):
 
 
 def delete_file(bucket_name, object_name):
-    try:
-        s3 = boto3.resource('s3', aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
-        s3.meta.client.delete_object(Bucket=bucket_name, Key=object_name)
-        return "File Deleted Successfully"
-    except:
-        return "File Deletion Failed"
+    # try:
+    s3 = boto3.resource('s3', aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
+    s3.meta.client.delete_object(Bucket=bucket_name, Key=object_name)
+    return "File Deleted Successfully"
+    # except:
+    #     return "File Deletion Failed"
 
 
 def list_s3_files(bucket_name):
@@ -69,14 +69,14 @@ def create_bucket(bucket_name, region=None):
 
 
 def delete_bucket(bucket_name):
-    try:
-        s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key= aws_secret_access_key)
-        response = s3_client.delete_bucket(Bucket=bucket_name,)
-        # print(response)
-        if response.get('ResponseMetadata'):
-            return "Bucket deleted successfully"
-        else:
-            return "Some error occurred"
-    except:
+    # try:
+    s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key= aws_secret_access_key)
+    response = s3_client.delete_bucket(Bucket=bucket_name,)
+    print(response)
+    if response.get('ResponseMetadata'):
+        return "Bucket deleted successfully"
+    else:
         return "Some error occurred"
+    # except:
+    #     return "Some error occurred"
         
